@@ -1,0 +1,38 @@
+<h1>Listing Evacuations</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Code</th>
+      <th>Prefecture</th>
+      <th>City</th>
+      <th>Address</th>
+      <th>Lat</th>
+      <th>Lng</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for evacuation <- @evacuations do %>
+    <tr>
+      <td><%= evacuation.name %></td>
+      <td><%= evacuation.code %></td>
+      <td><%= evacuation.prefecture %></td>
+      <td><%= evacuation.city %></td>
+      <td><%= evacuation.address %></td>
+      <td><%= evacuation.lat %></td>
+      <td><%= evacuation.lng %></td>
+
+      <td>
+        <span><%= link "Show", to: Routes.evacuation_path(@conn, :show, evacuation) %></span>
+        <span><%= link "Edit", to: Routes.evacuation_path(@conn, :edit, evacuation) %></span>
+        <span><%= link "Delete", to: Routes.evacuation_path(@conn, :delete, evacuation), method: :delete, data: [confirm: "Are you sure?"] %></span>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "New Evacuation", to: Routes.evacuation_path(@conn, :new) %></span>

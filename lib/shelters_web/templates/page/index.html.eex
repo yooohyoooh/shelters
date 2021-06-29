@@ -1,0 +1,83 @@
+<% 
+city_list =
+Register.read_file("130001_evacuation_center.csv")
+|> Enum.map(fn x -> x.city end)
+|> Enum.uniq()
+
+%>
+
+<section class="phx-hero">
+  <h1><%= gettext "Welcome to %{name}!", name: "Phoenix" %></h1>
+  <p>Peace of mind from prototype to production</p>
+</section>
+
+<div>
+<%= form_for @changeset, Routes.page_path(@conn, :index_by_city, @evacuations), fn f -> %>
+  <%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p>Oops, something went wrong! Please check the errors below.</p>
+    </div>
+  <% end %>
+
+
+<div class="row">
+    <%= label f, :city %>
+    <%= if @city do %>
+      <%= select f, :city, city_list, value: @city %>
+    <% else %>
+      <%= select f, :city, city_list, value: "千代田区" %>
+    <% end %>
+    <%= error_tag f, :city %>
+    </div>
+
+    <div>
+        <%= submit "検索" %>
+    </div>
+</div>
+<% end %>
+</div>
+<%# <%= render "city-form.html", evacuations: @evacuations, changeset: @changeset, action: Routes.page_path(@conn, :index, @evacuations) %>
+
+<div id="map" style="width: 70vw; height: 70vh;"></div>
+
+<%= if @city do %>
+<table style="width: 60vw;">
+  <thead>
+    <tr>
+      <th>避難場所名称</th>
+      <th>地方公共団体コード</th>
+      <th>都道府県</th>
+      <th>指定区市町村</th>
+      <th>住所</th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for evacuation <- @evacuations do %>
+    <tr>
+      <td><%= evacuation.name %></td>
+      <td><%= evacuation.code %></td>
+      <td><%= evacuation.prefecture %></td>
+      <td><%= evacuation.city %></td>
+      <td><%= evacuation.address %></td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+<% end %>
+
+
+<script>
+var map = L.map('map').setView([<%= hd(@evacuations).lat %>, <%= hd(@evacuations).lng %>], 11);
+</script>
+
+
+<%= for evacuation <- @evacuations do %>
+<script>
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+  L.marker([<%= evacuation.lat%>, <%= evacuation.lng%>]).addTo(map)
+      .bindPopup("<%= evacuation.name %>", {closeOnClick: false, autoClose: false}).openPopup();
+</script>
+<% end %>

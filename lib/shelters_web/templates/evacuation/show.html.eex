@@ -1,0 +1,43 @@
+<h1>Show Evacuation</h1>
+
+<ul>
+
+  <li>
+    <strong>Name:</strong>
+    <%= @evacuation.name %>
+  </li>
+
+  <li>
+    <strong>Code:</strong>
+    <%= @evacuation.code %>
+  </li>
+
+  <li>
+    <strong>Prefecture:</strong>
+    <%= @evacuation.prefecture %>
+  </li>
+
+  <li>
+    <strong>City:</strong>
+    <%= @evacuation.city %>
+  </li>
+
+  <li>
+    <strong>Address:</strong>
+    <%= @evacuation.address %>
+  </li>
+
+  <li>
+    <strong>Lat:</strong>
+    <%= @evacuation.lat %>
+  </li>
+
+  <li>
+    <strong>Lng:</strong>
+    <%= @evacuation.lng %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: Routes.evacuation_path(@conn, :edit, @evacuation) %></span>
+<span><%= link "Back", to: Routes.evacuation_path(@conn, :index) %></span>

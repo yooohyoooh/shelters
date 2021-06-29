@@ -1,0 +1,5 @@
+<h1>Edit Evacuation</h1>
+
+<%= render "form.html", Map.put(assigns, :action, Routes.evacuation_path(@conn, :update, @evacuation)) %>
+
+<span><%= link "Back", to: Routes.evacuation_path(@conn, :index) %></span>
