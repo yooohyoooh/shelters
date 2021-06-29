@@ -37,13 +37,20 @@ defmodule Shelters.Evacuations do
   """
   def get_evacuation!(id), do: Repo.get!(Evacuation, id)
 
+  @doc"""
+  get_evacuation_by_city
+  選択された指定区市町村にある避難場所のリストをデータベースから取得
+  """
   def get_evacuation_by_city(city) do
     Evacuation
     |> where([e], e.city == ^city)
-    |> order_by([e], [desc: e.code])
     |> Repo.all
   end
 
+  @doc"""
+  get_evacuation_by_address
+  選択された住所にある避難場所のリストをデータベースから取得
+  """
   def get_evacuation_by_address(address) do
     Evacuation
     |> where([e], e.address == ^address)

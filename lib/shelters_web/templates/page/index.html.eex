@@ -1,4 +1,5 @@
 <% 
+# CSVファイルからドロップダウンリスト用の市町村、住所リストを生成
 city_list =
 Register.read_file("130001_evacuation_center.csv")
 |> Enum.map(fn x -> x.city end)
@@ -10,16 +11,19 @@ Register.read_file("130001_evacuation_center.csv")
 
 %>
 
+<!-- @city；検索された市町村 or 検索された住所を含む市町村、@address：検索された住所　-->
 <section class="phx-hero">
   <%= if @city do %>
-  <h1><%= gettext "%{city}の避難場所一覧", city: @city %></h1>
-  <p>マップの中心地：<%= @address %></p>
+    <h1><%= gettext "%{city}の避難場所一覧", city: @city %></h1>
+    <p>マップの中心地：<%= @address %></p>
   <% else %>
-  <h1><%= gettext "東京都の避難場所一覧" %></h1>
-  <p>指定区市町村を選択するとリストも表示されます</p>
+    <h1><%= gettext "東京都の避難場所一覧" %></h1>
+    <p>指定区市町村を選択するとリストも表示されます</p>
   <% end %>
 </section>
 
+
+<!-- 指定区市町村での検索フォーム-->
 <div>
 <%= form_for @changeset, Routes.page_path(@conn, :index_by_city, @evacuations), fn f -> %>
   <%= if @changeset.action do %>
@@ -29,24 +33,25 @@ Register.read_file("130001_evacuation_center.csv")
   <% end %>
 
 
-<div class="row">
+  <div class="row">
     <%= label f, :city, "指定区市町村" %>
-    <%= if @city do %>
-      <%= select f, :city, city_list, value: @city %>
-    <% else %>
-      <%= select f, :city, city_list, value: "千代田区" %>
-    <% end %>
+      <%= if @city do %>
+        <%= select f, :city, city_list, value: @city %>
+      <% else %>
+        <%= select f, :city, city_list, value: "千代田区" %>
+      <% end %>
     <%= error_tag f, :city %>
     </div>
 
     <div>
-        <%= submit "検索" %>
+      <%= submit "検索" %>
     </div>
-</div>
+  </div>
 <% end %>
 </div>
-<%# <%= render "city-form.html", evacuations: @evacuations, changeset: @changeset, action: Routes.page_path(@conn, :index, @evacuations) %>
 
+
+<!-- 住所での検索フォーム-->
 <div>
 <%= form_for @changeset, Routes.page_path(@conn, :index_by_address, @evacuations), fn f -> %>
   <%= if @changeset.action do %>
@@ -57,23 +62,26 @@ Register.read_file("130001_evacuation_center.csv")
 
   <div class="row">
     <%= label f, :address, "住所" %>
-    <%= if @address do %>
-      <%= select f, :address, address_list, value: @address %>
-    <% else %>
-      <%= select f, :address, address_list%>
-    <% end %>
+      <%= if @address do %>
+        <%= select f, :address, address_list, value: @address %>
+      <% else %>
+        <%= select f, :address, address_list%>
+      <% end %>
     <%= error_tag f, :address %>
     </div>
 
     <div>
         <%= submit "住所検索" %>
     </div>
-</div>
-
+  </div>
 <% end %>
 </div>
+
+<!-- 地図表示 -->
 <div id="map" style="width: 70vw; height: 70vh;"></div>
 
+
+<!-- @cityにデータが入っている時のみ避難場所のリスト表示-->
 <%= if @city do %>
 <table style="width: 60vw;">
   <thead>
@@ -86,49 +94,44 @@ Register.read_file("130001_evacuation_center.csv")
     </tr>
   </thead>
   <tbody>
-<%= for evacuation <- @evacuations do %>
-    <tr>
-      <td><%= evacuation.name %></td>
-      <td><%= evacuation.code %></td>
-      <td><%= evacuation.prefecture %></td>
-      <td><%= evacuation.city %></td>
-      <td><%= evacuation.address %></td>
-    </tr>
-<% end %>
+    <%= for evacuation <- @evacuations do %>
+      <tr>
+        <td><%= evacuation.name %></td>
+        <td><%= evacuation.code %></td>
+        <td><%= evacuation.prefecture %></td>
+        <td><%= evacuation.city %></td>
+        <td><%= evacuation.address %></td>
+      </tr>
+    <% end %>
   </tbody>
 </table>
 <% end %>
-<!--
-<%= if @city do %>
-  <script>
-  var map = L.map('map').setView([<%= hd(@evacuations).lat %>, <%= hd(@evacuations).lng %>], 13);
-  </script>
-<% else %>
-    <script>
-    var map = L.map('map').setView([<%= hd(@evacuations).lat %>, <%= hd(@evacuations).lng %>], 10);
-    </script>
-<% end %>
--->
 
+<!-- 
+  地図の中心地を決定する条件分岐
+  @address == true：住所検索されている場合、その住所を中心地にする
+  @city == true；指定区市町村検索されている場合、その区市町村のリストの一番上にある住所を中心地にする
+  true：それ以外の場合、リストの一番上にある住所を中心地にする
+-->
 <%= cond do %>
   <% @address -> %>
     <script>
-    var map = L.map('map').setView([<%= @point.lat %>, <%= @point.lng %>], 13);
+      var map = L.map('map').setView([<%= @point.lat %>, <%= @point.lng %>], 13);
     </script>
     
   <% @city -> %>
     <script>
-    var map = L.map('map').setView([<%= hd(@evacuations).lat %>, <%= hd(@evacuations).lng %>], 13);
+      var map = L.map('map').setView([<%= hd(@evacuations).lat %>, <%= hd(@evacuations).lng %>], 13);
     </script>
 
   <% true -> %>
     <script>
-    var map = L.map('map').setView([<%= hd(@evacuations).lat %>, <%= hd(@evacuations).lng %>], 10);
+      var map = L.map('map').setView([<%= hd(@evacuations).lat %>, <%= hd(@evacuations).lng %>], 10);
     </script>
 
 <% end %>
 
-
+<!-- 地図に表示するポップの設定 -->
 <%= for evacuation <- @evacuations do %>
 <script>
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

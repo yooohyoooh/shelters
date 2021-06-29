@@ -1,4 +1,7 @@
 defmodule Register do
+  @doc"""
+  CSVファイルからデータを取得し、データベースに登録するモジュール
+  """
 
   alias Shelters.Evacuations.Evacuation
 
