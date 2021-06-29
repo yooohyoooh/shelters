@@ -44,6 +44,14 @@ defmodule Shelters.Evacuations do
     |> Repo.all
   end
 
+  def get_evacuation_by_address(address) do
+    Evacuation
+    |> where([e], e.address == ^address)
+    |> Repo.all
+  end
+
+
+
   @doc """
   Creates a evacuation.
 

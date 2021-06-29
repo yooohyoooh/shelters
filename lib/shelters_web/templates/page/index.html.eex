@@ -4,11 +4,20 @@ Register.read_file("130001_evacuation_center.csv")
 |> Enum.map(fn x -> x.city end)
 |> Enum.uniq()
 
+address_list = 
+Register.read_file("130001_evacuation_center.csv")
+|> Enum.map(fn x -> x.address end)
+
 %>
 
 <section class="phx-hero">
-  <h1><%= gettext "Welcome to %{name}!", name: "Phoenix" %></h1>
-  <p>Peace of mind from prototype to production</p>
+  <%= if @city do %>
+  <h1><%= gettext "%{city}の避難場所一覧", city: @city %></h1>
+  <p>マップの中心地：<%= @address %></p>
+  <% else %>
+  <h1><%= gettext "東京都の避難場所一覧" %></h1>
+  <p>指定区市町村を選択するとリストも表示されます</p>
+  <% end %>
 </section>
 
 <div>
@@ -21,7 +30,7 @@ Register.read_file("130001_evacuation_center.csv")
 
 
 <div class="row">
-    <%= label f, :city %>
+    <%= label f, :city, "指定区市町村" %>
     <%= if @city do %>
       <%= select f, :city, city_list, value: @city %>
     <% else %>
@@ -38,6 +47,31 @@ Register.read_file("130001_evacuation_center.csv")
 </div>
 <%# <%= render "city-form.html", evacuations: @evacuations, changeset: @changeset, action: Routes.page_path(@conn, :index, @evacuations) %>
 
+<div>
+<%= form_for @changeset, Routes.page_path(@conn, :index_by_address, @evacuations), fn f -> %>
+  <%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p>Oops, something went wrong! Please check the errors below.</p>
+    </div>
+  <% end %>
+
+  <div class="row">
+    <%= label f, :address, "住所" %>
+    <%= if @address do %>
+      <%= select f, :address, address_list, value: @address %>
+    <% else %>
+      <%= select f, :address, address_list%>
+    <% end %>
+    <%= error_tag f, :address %>
+    </div>
+
+    <div>
+        <%= submit "住所検索" %>
+    </div>
+</div>
+
+<% end %>
+</div>
 <div id="map" style="width: 70vw; height: 70vh;"></div>
 
 <%= if @city do %>
@@ -64,11 +98,35 @@ Register.read_file("130001_evacuation_center.csv")
   </tbody>
 </table>
 <% end %>
+<!--
+<%= if @city do %>
+  <script>
+  var map = L.map('map').setView([<%= hd(@evacuations).lat %>, <%= hd(@evacuations).lng %>], 13);
+  </script>
+<% else %>
+    <script>
+    var map = L.map('map').setView([<%= hd(@evacuations).lat %>, <%= hd(@evacuations).lng %>], 10);
+    </script>
+<% end %>
+-->
 
+<%= cond do %>
+  <% @address -> %>
+    <script>
+    var map = L.map('map').setView([<%= @point.lat %>, <%= @point.lng %>], 13);
+    </script>
+    
+  <% @city -> %>
+    <script>
+    var map = L.map('map').setView([<%= hd(@evacuations).lat %>, <%= hd(@evacuations).lng %>], 13);
+    </script>
 
-<script>
-var map = L.map('map').setView([<%= hd(@evacuations).lat %>, <%= hd(@evacuations).lng %>], 11);
-</script>
+  <% true -> %>
+    <script>
+    var map = L.map('map').setView([<%= hd(@evacuations).lat %>, <%= hd(@evacuations).lng %>], 10);
+    </script>
+
+<% end %>
 
 
 <%= for evacuation <- @evacuations do %>

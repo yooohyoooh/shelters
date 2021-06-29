@@ -19,6 +19,7 @@ defmodule SheltersWeb.Router do
     get "/", PageController, :index
     resources "/evacuations", EvacuationController
     post "/", PageController, :index_by_city
+    post "/address", PageController, :index_by_address
   end
 
   # Other scopes may use custom stacks.
